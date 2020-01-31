@@ -41,7 +41,7 @@ func fixtureHTTPNotifier() *HTTPNotifier {
 	viper.Set("notifier.test.template-open", "template_open")
 	viper.Set("notifier.test.template-close", "template_close")
 	viper.Set("notifier.test.send-close", false)
-	viper.Set("notifier.test.headers", map[string]string{"Token": "testtoken"})
+	viper.Set("notifier.test.headers", map[string]string{"Token": "testtoken","Host": "newhost"})
 	viper.Set("notifier.test.noverify", true)
 
 	return &module
@@ -96,14 +96,17 @@ func TestHttpNotifier_Notify_Open(t *testing.T) {
 	// handler that validates that we get the right values
 	requestHandler := func(w http.ResponseWriter, r *http.Request) {
 		// Must get an appropriate Content-Type header
-		headers, ok := r.Header["Content-Type"]
+		headerContentType, ok := r.Header["Content-Type"]
 		assert.True(t, ok, "Expected to receive Content-Type header")
-		assert.Len(t, headers, 1, "Expected to receive exactly one Content-Type header")
-		assert.Equalf(t, "application/json", headers[0], "Expected Content-Type header to be 'application/json', not '%v'", headers[0])
+		assert.Len(t, headerContentType, 1, "Expected to receive exactly one Content-Type header")
+		assert.Equalf(t, "application/json", headerContentType[0], "Expected Content-Type header to be 'application/json', not '%v'", headerContentType[0])
 
 		tokenHeaders, ok := r.Header["Token"]
 		assert.True(t, ok, "Expected to receive Token header")
 		assert.Equalf(t, "testtoken", tokenHeaders[0], "Expected Token header to be 'testtoken', not '%v'", tokenHeaders[0])
+
+		host := r.Host
+		assert.Equalf(t, "newhost", host, "Expected host to be 'newhost', not '%v'", host)
 
 		assert.Equalf(t, "id=testidstring", r.URL.RawQuery, "Expected URL querystring to be id=testidstring, not %v", r.URL)
 
@@ -157,6 +160,9 @@ func TestHttpNotifier_Notify_Close(t *testing.T) {
 		tokenHeaders, ok := r.Header["Token"]
 		assert.True(t, ok, "Expected to receive Token header")
 		assert.Equalf(t, "testtoken", tokenHeaders[0], "Expected Token header to be 'testtoken', not '%v'", tokenHeaders[0])
+
+		host := r.Host
+		assert.Equalf(t, "newhost", host, "Expected host to be 'newhost', not '%v'", host)
 
 		assert.Equalf(t, "id=testidstring", r.URL.RawQuery, "Expected URL querystring to be id=testidstring, not %v", r.URL)
 
