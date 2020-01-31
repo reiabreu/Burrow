@@ -215,7 +215,7 @@ func (module *HTTPNotifier) Notify(status *protocol.ConsumerGroupStatus, eventID
 		// For client requests, Host optionally overrides the Host
 		// header to send. If empty, the Request.Write method uses
 		// the value of URL.Host
-		if strings.ToLower(header)=="host" && value!=""{
+		if strings.ToLower(header) == "host" && value != "" {
 			req.Host = value
 		}
 	}
